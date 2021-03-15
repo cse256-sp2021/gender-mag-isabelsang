@@ -2,7 +2,7 @@
 // ---- Most functions have a required "id_prefix" parameter: you need to specify unique ids that will be used in the HTML, 
 // ---- so that we can tell from the logs what was actually clicked on.
 
-
+ 
 // --- helper functions for connecting things with events ---
 
 // define an observer which will call the passed on_attr_change function when the watched_attribute of watched_elem_selector 
@@ -503,12 +503,12 @@ function define_new_user_select_field(id_prefix, select_button_text, on_user_cha
 
 // Get a (very simple) text representation of a permissions explanation
 function get_explanation_text(explanation) {
-    return `
-    Action allowed?: ${explanation.is_allowed}; 
-    Because of
-    permission set for file: ${explanation.file_responsible?get_full_path(explanation.file_responsible):'N/A'}
-    and for user: ${ explanation.ace_responsible ? get_user_name(explanation.ace_responsible.who) : 'N/A' }
-    ${ explanation.text_explanation ? `(${explanation.text_explanation})`  : '' }
+    return `<p>Action allowed? <i>${explanation.is_allowed}</i>; </p>
+    <br/>
+    <p>Because of
+    permission set for file: <i>${explanation.file_responsible?get_full_path(explanation.file_responsible):'N/A'}</i>
+    and for user: <i>${ explanation.ace_responsible ? get_user_name(explanation.ace_responsible.who) : 'N/A' }</i>
+    ${ explanation.text_explanation ? `(${explanation.text_explanation})`  : '' }</p>
     `
 }
 
