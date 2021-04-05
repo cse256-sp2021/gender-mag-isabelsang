@@ -1,5 +1,5 @@
 .file {
-    padding: 8;
+    padding: 8px;
     border-bottom: 1px solid #dddddd;
 }
 
@@ -35,4 +35,13 @@
 
 .no-close .ui-dialog-titlebar-close {
     display: none;
+}
+
+#flex-wrapper{
+    display: flex;
+    justify-content: space-between;
+}
+
+#adv_effective_effective_text {
+    font-weight: bold;
 }

@@ -1,5 +1,7 @@
 // Configuration
 show_starter_dialogs = false // set this to "false" to disable the survey and 3-minute timer. Set to "true" before submitting to MTurk!!
+detailed_permission_user_selected = false 
+detailed_user = null
 
 // ---- Set up main Permissions dialog ----
 
@@ -8,7 +10,7 @@ show_starter_dialogs = false // set this to "false" to disable the survey and 3-
 perm_dialog = define_new_dialog('permdialog', title='Permissions', options = {
     // The following are standard jquery-ui options. See https://jqueryui.com/dialog/
     height: 500,
-    width: 400,
+    width: 450,
     buttons: {
         OK:{
             text: "OK",
@@ -29,10 +31,10 @@ perm_dialog = define_new_dialog('permdialog', title='Permissions', options = {
 
 // Make the initial "Object Name:" text:
 // If you pass in valid HTML to $(), it will *create* elements instead of selecting them. (You still have to append them, though)
-obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <span id="permdialog_objname_namespan"></span> </div>')
+obj_name_div = $('<div id="permdialog_objname" class="section">File Name: <span id="permdialog_objname_namespan"></span> </div>')
 
 //Make the div with the explanation about special permissions/advanced settings:
-advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
+advanced_expl_div = $('<div id ="shaded_box_explanation"><i>Permissions that have shaded checkboxes are inherited.</i></div><br/><div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
 // Make the (grouped) permission checkboxes table:
 grouped_permissions = define_grouped_permission_checkboxes('permdialog_grouped_permissions')
@@ -47,6 +49,21 @@ file_permission_users.css({
     'height':'80px',
 })
 
+//Make confirmation of adding a user:
+added_new_user = define_new_dialog('added_new_user', '', {
+    buttons: {
+        OK: {
+            text: "OK",
+            id: "added-user-button",
+            click: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    }
+})
+
+
+
 // Make button to add a new user to the list:
 perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', on_user_change = function(selected_user){
     let filepath = perm_dialog.attr('filepath')
@@ -56,7 +73,10 @@ perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', o
             new_user_elem = make_user_elem('permdialog_file_user', selected_user)
             file_permission_users.append(new_user_elem)
         }
-    }    
+        added_new_user.text(`You just added a new user!  You can now add permissions for ${selected_user}`)
+        added_new_user.dialog("open")  
+    }
+    perm_add_user_select.find('span').hide()
 })
 perm_add_user_select.find('span').hide()// Cheating a bit - just show the button from the user select; hide the part that displays the username.
 
@@ -78,8 +98,8 @@ cant_remove_dialog = define_new_dialog('cant_remove_inherited_dialog', 'Security
 cant_remove_dialog.html(`
 <div id="cant_remove_text">
     You can't remove <span id="cant_remove_username_1" class = "cant_remove_username"></span> because this object is inheriting permissions from 
-    its parent. To remove <span id="cant_remove_username_2" class = "cant_remove_username"></span>, you must prevent this object from inheriting permissions.
-    Turn off the option for inheriting permissions, and then try removing <span id="cant_remove_username_3" class = "cant_remove_username"></span>  again.
+    its parent. To remove <span id="cant_remove_username_2" class = "cant_remove_username"></span>, you must allow editing of inheritable permissions.
+    Turn on the "Change" option for inheriting permissions in Advanced Settings, and then try removing <span id="cant_remove_username_3" class = "cant_remove_username"></span>  again.
 </div>`)
 
 // Make a confirmation "are you sure you want to remove?" dialog
@@ -207,7 +227,8 @@ function make_all_users_list(id_prefix, attr_set_id, height=80) {
 function open_permission_entry(file_path) {
     let file_obj = path_to_file[file_path]
 
-    $('#perm_entry_username').text('')
+    $('#perm_entry_username').text(detailed_user)
+    $('#perm_entry_username').attr("selected_user", detailed_user)
 
     $('.perm_entry_checkcell').empty()
 
@@ -224,10 +245,9 @@ function open_advanced_dialog(file_path) {
     $('#adv_effective_filepath').text(file_path);
     $('#advdialog').attr('filepath', file_path);
 
-    // clear dynamic content:
+    //reset
     $('#adv_perm_table tr:gt(0)').remove()
     $('#adv_owner_user_list').empty()
-    $(`.effectivecheckcell`).empty()
 
     if(file_obj.using_permission_inheritance) {
         $('#adv_perm_inheritance').prop('checked', true)
@@ -235,8 +255,6 @@ function open_advanced_dialog(file_path) {
     else {
         $('#adv_perm_inheritance').prop('checked', false)
     }
-
-
 
     // permissions list for permissions tab:
     let users = get_file_users(file_obj)
@@ -262,8 +280,46 @@ function open_advanced_dialog(file_path) {
     $('#adv_owner_user_list').append(all_user_list)
 
     // open dialog:
+    // $(`#advdialog`).dialog({
+    //     open: function(event, ui) {
+    //         var close_buttons = document.getElementsByClassName('ui-dialog-titlebar-close')
+
+    //         var reset = function() {
+    //             reset_detailed_user();
+    //         }
+
+    //         for (var i = 0; i < close_buttons.length; i++) {
+    //             close_buttons[i].addEventListener('click', reset, false);
+    //         }
+    //     }
+    // })
     $(`#advdialog`).dialog('open')
+    
+    
+
+    //check if user is selected for detailed permissions
+    detailed_list = document.getElementById("detailed_list")
+    if (detailed_permission_user_selected){
+        detailed_list.style.display = "block"
+        no_detailed_list.style.display = "none"
+    } else {
+        detailed_list.style.display = "none"
+        no_detailed_list.style.display = "block"
+    }
 }
+
+// reset detailed_user variable for Detailed Permissions
+function reset_detailed_user(){
+    detailed_user = null
+    detailed_permission_user_selected = false
+
+    $('#user_select_dialog').attr('username', null)
+    $('#adv_effective_current_user')[0].innerHTML = "&nbsp";
+
+    
+    $(`.effectivecheckcell`).empty()
+}
+
 
 // Update Effective User display
 function update_effective_user() {
@@ -327,6 +383,7 @@ let adv_contents = $(`#advdialog`).dialog({
             text: "OK",
             id: "advanced-dialog-ok-button",
             click: function() {
+                reset_detailed_user()
                 $( this ).dialog( "close" );
             }
         }
@@ -337,6 +394,58 @@ let adv_contents = $(`#advdialog`).dialog({
 // open user select dialog on "select" button press:
 $("#adv_effective_user_select").click(function(event){
     open_user_select("adv_effective_current_user") // Update element with id=adv_effective_current_user once user is selected.
+})
+
+$('#change_inheritance_button').click(function(){
+    let filepath = $('#advdialog').attr('filepath')
+    let file_obj = path_to_file[filepath]
+    // has just been turned off - pop up dialog with add/remove/cancel
+    $(`<div id="add_remove_cancel" title="Security">
+        Warning: if you proceed, inheritable permissions will no longer propagate to this object.<br/>
+        - Click <b>Change</b> to have the ability to edit or remove inherited parent permissions (these permissions will no longer be considered inherited)<br/>
+        - Click <b>Remove</b> to remove ALL inherited parent permissions from this object<br/>
+        - Click <b>Cancel</b> if you do not want to modify inheritance settings at this time.<br/>
+    </div>`).dialog({ // TODO: don't create this dialog on the fly
+        modal: true,
+        width: 400,
+        appendTo: "#html-loc",
+        position: { my: "top", at: "top", of: $('#html-loc') },
+        buttons: {
+            Add: {
+                text: "Change",
+                id: "adv-inheritance-add-button",
+                click: function() {
+                    let filepath = $('#advdialog').attr('filepath')
+                    let file_obj = path_to_file[filepath]
+                    convert_parent_permissions(file_obj)
+                    open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
+                    perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                    $( this ).dialog( "close" );
+                },
+            },
+            Remove: {
+                text: "Remove",
+                id: "adv-inheritance-remove-button",
+                click: function() {
+                    let filepath = $('#advdialog').attr('filepath')
+                    let file_obj = path_to_file[filepath]
+                    file_obj.using_permission_inheritance = false
+                    emitState()
+                    open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
+                    perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                    $( this ).dialog( "close" );
+                },
+            },
+            Cancel: {
+                text: "Cancel",
+                id: "adv-inheritance-cancel-button",
+                click: function() {
+                    $('#adv_perm_inheritance').prop('checked', true) // undo unchecking
+                    $( this ).dialog( "close" );
+                },
+            },
+        }
+    })
 })
 
 // listen for changes to inheritance checkbox:
@@ -354,9 +463,9 @@ $('#adv_perm_inheritance').change(function(){
         // has just been turned off - pop up dialog with add/remove/cancel
         $(`<div id="add_remove_cancel" title="Security">
             Warning: if you proceed, inheritable permissions will no longer propagate to this object.<br/>
-            - Click Add to convert and add inherited parent permissions as explicit permissions on this object<br/>
-            - Click Remove to remove inherited parent permissions from this object<br/>
-            - Click Cancel if you do not want to modify inheritance settings at this time.<br/>
+            - Click <b>Change</b> to have the ability to edit or remove inherited parent permissions (these permissions will no longer be considered inherited)<br/>
+            - Click <b>Remove</b> to remove ALL inherited parent permissions from this object<br/>
+            - Click <b>Cancel</b> if you do not want to modify inheritance settings at this time.<br/>
         </div>`).dialog({ // TODO: don't create this dialog on the fly
             modal: true,
             width: 400,
@@ -364,7 +473,7 @@ $('#adv_perm_inheritance').change(function(){
             position: { my: "top", at: "top", of: $('#html-loc') },
             buttons: {
                 Add: {
-                    text: "Add",
+                    text: "Change",
                     id: "adv-inheritance-add-button",
                     click: function() {
                         let filepath = $('#advdialog').attr('filepath')
@@ -481,6 +590,7 @@ let user_select_contents = $("#user_select_dialog").dialog({
             text: "Cancel",
             id: "user-select-cancel-button",
             click: function() {
+                //check if user is selected for detailed permissions
                 $( this ).dialog( "close" );
             },
         },
@@ -491,6 +601,17 @@ let user_select_contents = $("#user_select_dialog").dialog({
                 // populate field with user name (assume these are stored in attributes)
                 let to_populate_id = $(this).attr('to_populate')
                 let selected_value = $(this).attr('username')
+                if (selected_value != null && to_populate_id == "adv_effective_current_user"){
+                    detailed_permission_user_selected = true
+                } 
+                //check if user is selected for detailed permissions
+                no_detailed_list = document.getElementById("no_detailed_list")
+                detailed_list = document.getElementById("detailed_list")
+                if (detailed_permission_user_selected){
+                    detailed_list.style.display = "block"
+                    no_detailed_list.style.display = "none"
+                    detailed_user = selected_value
+                } 
                 $(`#${to_populate_id}`).text(selected_value)
                 $(`#${to_populate_id}`).attr('selected_user', selected_value)
                 $( this ).dialog( "close" );
@@ -514,7 +635,10 @@ let perm_entry_dialog = $('#permentry').dialog({
             id: "permission-entry-ok-button",
             click: function() {
                 open_advanced_dialog($('#advdialog').attr('filepath') )// redo advanced dialog (recalc permissions)
-                perm_dialog.attr('filepath', filepath) // reload contents of permissions dialog
+                detailed_user = $("#perm_entry_username")[0].innerHTML
+                if (typeof filepath !== 'undefined') {
+                    perm_dialog.attr('filepath', filepath) // reload contents of permissions dialog
+                }
                 $( this ).dialog( "close" );
             }
         }

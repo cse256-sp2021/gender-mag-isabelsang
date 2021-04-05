@@ -6,9 +6,11 @@ user_select_field = define_new_user_select_field("user-select", "Choose a user",
 })
 dialog = define_new_dialog('more-info', title='More Information')
 
+
+
 // ---- Display file structure ----
-$('#sidepanel').append(user_select_field)
-$('#sidepanel').append(effective_permission_panel)
+// $('#sidepanel').append(user_select_field)
+// $('#sidepanel').append(effective_permission_panel)
 $('.perm_info').click(function(){
     $( "#more-info" ).dialog( "open" )
     username = $('#effective-permission-panel').attr('username')
@@ -92,3 +94,7 @@ $('.permbutton').click( function( e ) {
 
 // ---- Assign unique ids to everything that doesn't have an ID ----
 $('#html-loc').find('*').uniqueId() 
+
+
+//-----Add Permission to Lock Button -----
+$('.permbutton').append('Permissions')  

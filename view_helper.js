@@ -479,8 +479,8 @@ function open_user_select_dialog(to_populate_id) {
 function define_new_user_select_field(id_prefix, select_button_text, on_user_change = function(selected_user){}){
     // Make the element:
     let sel_section = $(`<div id="${id_prefix}_line" class="section">
-            <span id="${id_prefix}_field" class="ui-widget-content" style="width: 80%;display: inline-block;">&nbsp</span>
-            <button id="${id_prefix}_button" class="ui-button ui-widget ui-corner-all">${select_button_text}</button>
+        <button id="${id_prefix}_button" class="ui-button ui-widget ui-corner-all">${select_button_text}</button>       
+        <span id="${id_prefix}_field" class="ui-widget-content" style="width: 80%;display: none;">&nbsp</span>
         </div>`)
 
     // Open user select on button click:
@@ -492,6 +492,7 @@ function define_new_user_select_field(id_prefix, select_button_text, on_user_cha
     let field_selector = sel_section.find(`#${id_prefix}_field`)
     define_attribute_observer(field_selector, 'selected_user', function(new_username){
         field_selector.text(new_username)
+        document.getElementById(`${id_prefix}_field`).style.display = "inline-block"
         // call the function for additional processing of user change:
         on_user_change(new_username)
     })
@@ -518,4 +519,4 @@ $('#filestructure').css({
     'width':'49%',
     'vertical-align': 'top'
 })
-$('#filestructure').after('<div id="sidepanel" style="display:inline-block;width:49%"></div>')
+// $('#filestructure').after('<div id="sidepanel" style="display:inline-block;width:40%;margin:20px;border:1px solid gray; padding: 10px"></div>')
