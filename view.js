@@ -6,13 +6,29 @@ user_select_field = define_new_user_select_field("user-select", "Choose a user",
 })
 dialog = define_new_dialog('more-info', title='More Information')
 
-
+let folder_elem = $(`
+        <div class='folderHelp' id="help_div">
+            <h3 id="help_header">
+                Help
+            </h3>
+            <div class='folder_contents'>
+             <h4>What does "inherited" mean?</h4>
+                <p>If a file is contained within a folder, 
+                it inherits all the permissions from this folder (called the "Parent").  </p>
+                <p><i>For example: if a user has Read Permission for a Parent folder, 
+                this user will also have Read Permission for all the files within the folder.
+                </i></p>
+                
+            </div>
+        </div>`)
 
 // ---- Display file structure ----
 // $('#sidepanel').append(user_select_field)
 // $('#sidepanel').append(effective_permission_panel)
+$('#sidepanel').append(folder_elem)
 $('.perm_info').click(function(){
     $( "#more-info" ).dialog( "open" )
+    // console.log($(this).attr('permission_name'))
     username = $('#effective-permission-panel').attr('username')
     filepath = $('#effective-permission-panel').attr('filepath')
     permission_name = $(this).attr('permission_name')
@@ -20,9 +36,9 @@ $('.perm_info').click(function(){
     file = path_to_file[filepath]
     user = all_users[username]
 
-    has_permission = allow_user_action(file, user, permission_name, explain_why = true)
-    explanation = get_explanation_text(has_permission)
-    $('#more-info').html(explanation)
+    // has_permission = allow_user_action(file, user, permission_name, explain_why = true)
+    // explanation = get_explanation_text(has_permission)
+    $('#more-info').html(permission_name)
 })
 
 
@@ -73,6 +89,13 @@ $('.folder').accordion({
     collapsible: true,
     heightStyle: 'content'
 }) // TODO: start collapsed and check whether read permission exists before expanding?
+
+// make folder hierarchy into an accordion structure
+$('.folderHelp').accordion({
+    collapsible: true,
+    heightStyle: 'content',
+    active: false
+}) 
 
 
 // -- Connect File Structure lock buttons to the permission dialog --

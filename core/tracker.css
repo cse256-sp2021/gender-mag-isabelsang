@@ -28,3 +28,9 @@
 .top-banner-button:hover {
     background-color: rgb(255, 97, 40);
 }
+
+#help_header{
+    background-color: green;
+    border: 1px green solid;
+    color: white;
+}

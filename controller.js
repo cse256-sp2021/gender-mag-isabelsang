@@ -342,9 +342,66 @@ function convert_parent_permissions(file_obj) {
     }
 }
 
+function inherit_permissions(file_obj){
+
+    var old_perms = {}
+    
+    for (user of Object.values(all_users)) {
+        old_perms[user] = get_total_permissions(file_obj, user)
+    }
+
+    file_obj.using_permission_inheritance = true;
+    file_obj.acl = [];
+
+    for (user of Object.values(all_users)) {
+        // for each user
+        let new_perms = get_total_permissions(file_obj, user);
+        let user_perms = old_perms[user];
+        for (let ace_type in user_perms) {
+            //for each of 'allow' and 'deny'
+            for (let perm in user_perms[ace_type]) {
+                
+                // for each permission
+                if (!user_perms[ace_type][perm].inherited) {
+                    // if it's inherited, add directly
+                    file_obj.acl.push(
+                        make_ace(user, perm, ace_type === 'allow')
+                    );
+                }
+            }
+        }
+    }
+
+    emitState();
+
+
+    // if (file_obj.using_permission_inheritance) {
+    //     // Only do this if inheritance is actually on
+    //     for (user of Object.values(all_users)) {
+    //         // for each user
+    //         let user_perms = get_total_permissions(file_obj, user);
+    //         for (let ace_type in user_perms) {
+    //             //for each of 'allow' and 'deny'
+    //             for (let perm in user_perms[ace_type]) {
+    //                 // for each permission
+    //                 if (user_perms[ace_type][perm].inherited) {
+    //                     // if it's inherited, add directly
+    //                     file_obj.acl.push(
+    //                         make_ace(user, perm, ace_type === 'allow')
+    //                     );
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     file_obj.using_permission_inheritance = false;
+    //     emitState();
+}
+
 function replace_child_perm_with_inherited(file_obj) {
+    console.log(file_obj)
     let filepath = get_full_path(file_obj);
     for (c of parent_to_children[filepath]) {
+        console.log(c)
         c.using_permission_inheritance = true;
         c.acl = [];
     }

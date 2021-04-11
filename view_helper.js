@@ -225,8 +225,10 @@ function define_grouped_permission_checkboxes(id_prefix, which_groups = null) {
     // For each permissions group, create a row:
     for(let g of which_groups){
         let row = $(`<tr id="${id_prefix}_row_${g}">
-            <td id="${id_prefix}_${g}_name">${g}</td>
+            <td id="${id_prefix}_${g}_name">${g}
+            </td>
         </tr>`)
+        //inside td: <span id="${id_prefix}_${g}_info_icon" class="fa fa-info-circle perm_info" permission_name="${g}" setting_container_id="${id_prefix}" style="margin: 0px 5px;"/>
         for(let ace_type of ['allow', 'deny']) {
             row.append(`<td id="${id_prefix}_${g}_${ace_type}_cell">
                 <input type="checkbox" id="${id_prefix}_${g}_${ace_type}_checkbox" ptype="${ace_type}" class="groupcheckbox" group="${g}" ></input>
@@ -519,4 +521,4 @@ $('#filestructure').css({
     'width':'49%',
     'vertical-align': 'top'
 })
-// $('#filestructure').after('<div id="sidepanel" style="display:inline-block;width:40%;margin:20px;border:1px solid gray; padding: 10px"></div>')
+$('#filestructure').after('<div id="sidepanel" style="display:inline-block;width:40%;margin:20px;padding: 10px"></div>')
