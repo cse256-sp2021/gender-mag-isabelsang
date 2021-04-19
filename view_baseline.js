@@ -397,7 +397,7 @@ $("#adv_effective_user_select").click(function(event){
 })
 
 $('#change_inheritance_button').click(function(event){
-    console.log("clicked")
+    console.log("clicked") 
     let filepath = $('#advdialog').attr('filepath')
     let file_obj = path_to_file[filepath]
     // has just been turned off - pop up dialog with add/remove/cancel
