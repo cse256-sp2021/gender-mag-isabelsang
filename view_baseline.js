@@ -5,7 +5,7 @@ detailed_user = null
 
 // ---- Set up main Permissions dialog ----
 
-// --- Create all the elements, and connect them as needed: ---
+// --- Create all the elements, and connect them as needed: --- 
 // Make permissions dialog:
 perm_dialog = define_new_dialog('permdialog', title='Permissions', options = {
     // The following are standard jquery-ui options. See https://jqueryui.com/dialog/
